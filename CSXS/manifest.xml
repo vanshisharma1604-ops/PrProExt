@@ -16,8 +16,8 @@
     <Extension Id="com.lightskiddo.ppro.panel">
       <DispatchInfo>
         <Resources>
-          <MainPath>public/index.html</MainPath>
-          <ScriptPath>jsx/bridge.jsx</ScriptPath>
+          <MainPath>./index.html</MainPath>
+          <ScriptPath>./jsx/bridge.jsx</ScriptPath>
         </Resources>
         <Lifecycle AutoVisible="true"/>
         <UI>
