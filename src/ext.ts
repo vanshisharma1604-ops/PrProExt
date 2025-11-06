@@ -12,24 +12,61 @@ export const WS  = env("VITE_WS_URL",  "wss://api.lightskiddo.com");
 const RID_KEY = "light_rid";
 export function rid(){ let v = localStorage.getItem(RID_KEY); if(!v){ v = crypto.randomUUID(); localStorage.setItem(RID_KEY,v); } return v; }
 
-export function openLogin(){
+export async function openLogin(){
   // system-browser OAuth handoff
-  cs.openURLInDefaultBrowser(`${API}/auth/start?rid=${encodeURIComponent(rid())}`);
+  // Call POST /auth/premiere/start to get the authorizeUrl
+  const currentRid = rid();
+  try {
+    const response = await fetch(`${API}/auth/premiere/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rid: currentRid }),
+      credentials: "omit"
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      // Open the authorizeUrl from the server response (not the API endpoint)
+      if (data?.authorizeUrl) {
+        cs.openURLInDefaultBrowser(data.authorizeUrl);
+      } else {
+        console.error("No authorizeUrl in response:", data);
+      }
+    } else {
+      console.error("Failed to start auth:", response.status, await response.text());
+    }
+  } catch (error) {
+    console.error("Error starting auth:", error);
+  }
 }
 
 export function pollAuthStatus(onToken:(t:string)=>void){
-  // optional short-poll fallback if WS doesn't deliver token
-  const url = `${API}/auth/status?rid=${encodeURIComponent(rid())}`;
+  // Poll GET /auth/premiere/status/:rid for the token
+  const currentRid = rid();
+  const url = `${API}/auth/premiere/status/${encodeURIComponent(currentRid)}`;
   const stop = { active: true };
   const tick = async () => {
     if(!stop.active) return;
     try{
-      const r = await fetch(url, { credentials: "omit" });
+      const r = await fetch(url, { 
+        method: "GET",
+        credentials: "omit",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
       if (r.ok) {
         const j = await r.json();
-        if (j?.ok && j?.token) { localStorage.setItem("light_token", j.token); onToken(j.token); stop.active = false; return; }
+        if (j?.ok && j?.token) { 
+          localStorage.setItem("light_token", j.token); 
+          onToken(j.token); 
+          stop.active = false; 
+          return; 
+        }
       }
-    } catch {}
+    } catch (error) {
+      console.error("Poll error:", error);
+    }
     setTimeout(tick, 2000);
   };
   tick();
@@ -73,11 +110,19 @@ export function snapshot(cb:(snap:any)=>void){
 }
 
 export async function postJSON(url:string, body:any, useApiKey:boolean){
-  const headers: Record<string,string> = { "Content-Type": "application/json" };
+  const headers: Record<string,string> = { 
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+  };
   const token = localStorage.getItem("light_token") || "";
   const apikey = localStorage.getItem("light_apikey") || "";
   if (token) headers["Authorization"] = `Bearer ${token}`;
   if (useApiKey && apikey) headers["X-Api-Key"] = apikey;
-  return fetch(url, { method:"POST", headers, body: JSON.stringify(body) });
+  return fetch(url, { 
+    method:"POST", 
+    headers, 
+    body: JSON.stringify(body),
+    credentials: "omit"
+  });
 }
 

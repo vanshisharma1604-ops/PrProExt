@@ -35,11 +35,11 @@ export default function Panel(){
     wsRef.current = connectWS(onMsg, (s)=>{ setStatus(s); setConnecting(false); });
   }
 
-  function login(){
+  async function login(){
     pollStopRef.current?.();
     setStatus("Waiting for browser login…");
     // open Google OAuth in the system browser (required; Google blocks embedded auth)
-    openLogin();
+    await openLogin();
     // poll the backend until the OAuth flow completes
     pollStopRef.current = pollAuthStatus(() => {
       setStatus("Authenticated");
