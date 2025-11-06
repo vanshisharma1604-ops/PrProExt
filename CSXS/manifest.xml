@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.lightskiddo.ppro" ExtensionBundleVersion="0.1.0">
+  <ExtensionList>
+    <Extension Id="com.lightskiddo.ppro.panel" Version="0.1.0"/>
+  </ExtensionList>
+  <ExecutionEnvironment>
+    <HostList>
+      <Host Name="PPRO" Version="[0.0,99.9]"/>
+    </HostList>
+    <LocaleList><Locale Code="All"/></LocaleList>
+    <RequiredRuntimeList>
+      <RequiredRuntime Name="CSXS" Version="12.0"/>
+    </RequiredRuntimeList>
+  </ExecutionEnvironment>
+  <DispatchInfoList>
+    <Extension Id="com.lightskiddo.ppro.panel">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>public/index.html</MainPath>
+          <ScriptPath>jsx/bridge.jsx</ScriptPath>
+        </Resources>
+        <Lifecycle AutoVisible="true"/>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>Light Copilot</Menu>
+          <Geometry>
+            <Size><Width>420</Width><Height>700</Height></Size>
+          </Geometry>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+  </DispatchInfoList>
+</ExtensionManifest>
+
